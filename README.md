@@ -64,7 +64,17 @@ Chọn cấu hình khác nếu cần:
 | `anthropic` | `ANTHROPIC_API_KEY` | Tên model Claude hỗ trợ tool use. |
 | `openrouter` | `OPENROUTER_API_KEY` | Model ID đầy đủ trên OpenRouter, thường có dạng provider/model. |
 
-Ví dụ chuyển sang Gemini: `export PROVIDER=gemini`, đặt `GEMINI_API_KEY` và `MODEL` phù hợp. Chọn một provider; không cần cả bốn key. File `.env.example` chỉ là mẫu: chương trình **không tự đọc `.env`**. Có thể chạy `cp .env.example .env`, điền key rồi chạy `source .env` trong mỗi terminal mới. Trên Windows, dùng Git Bash để chạy đúng các lệnh này, hoặc thay `python3` bằng `python` và đặt biến bằng `$env:TEN_BIEN='gia_tri'` trong PowerShell. Không commit key hay trace chứa dữ liệu nhạy cảm.
+Ví dụ chuyển sang Gemini: `export PROVIDER=gemini`, đặt `GEMINI_API_KEY` và `MODEL` phù hợp. Chọn một provider; không cần cả bốn key. Chương trình **tự đọc file `.env` trong thư mục gốc** khi chạy agent hoặc eval; biến đã đặt trong terminal được ưu tiên. Sao chép `.env.example` thành `.env` (PowerShell: `Copy-Item .env.example .env`), rồi điền key và model. Trên Windows, thay `python3` bằng `python`. Không commit key hay trace chứa dữ liệu nhạy cảm.
+
+Ví dụ nội dung `.env` khi dùng OpenRouter:
+
+```dotenv
+PROVIDER=openrouter
+MODEL=YOUR_TOOL_CALLING_MODEL
+OPENROUTER_API_KEY=YOUR_KEY
+```
+
+Thay `YOUR_TOOL_CALLING_MODEL` bằng model ID trên OpenRouter có hỗ trợ tool calling và `YOUR_KEY` bằng API key của bạn. Sau đó chạy `python run.py "GitHub Actions có sự cố gì?"` trong PowerShell.
 
 Adapter dùng Chat Completions cho OpenAI, Gemini compatibility và OpenRouter; Anthropic dùng Messages API. Nó phục vụ **tool calling cơ bản**, không bao phủ mọi tính năng đặc thù model như extended thinking. Khi provider từ chối model hoặc hết quota, kiểm tra quyền truy cập, model ID và key. Xem tài liệu: [OpenAI](https://developers.openai.com/api/docs/guides/function-calling), [Gemini](https://ai.google.dev/gemini-api/docs/openai), [Anthropic](https://platform.claude.com/docs/en/agents-and-tools/tool-use/how-tool-use-works), [OpenRouter](https://openrouter.ai/docs/guides/features/tool-calling).
 

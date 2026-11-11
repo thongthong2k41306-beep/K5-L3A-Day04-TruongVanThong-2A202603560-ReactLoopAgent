@@ -1,8 +1,36 @@
 """Bốn provider cùng một interface. Không chứa agent loop."""
 import json
 import os
+from pathlib import Path
 import urllib.error
 import urllib.request
+
+
+def load_env(path=None):
+    """Đọc .env cạnh providers.py; ưu tiên biến đã đặt trong terminal."""
+    path = Path(path) if path is not None else Path(__file__).resolve().with_name('.env')
+    if not path.is_file():
+        return
+    for raw_line in path.read_text(encoding='utf-8-sig').splitlines():
+        line = raw_line.strip()
+        if not line or line.startswith('#'):
+            continue
+        if line.startswith('export '):
+            line = line[7:].strip()
+        if '=' not in line:
+            continue
+        name, value = line.split('=', 1)
+        name, value = name.strip(), value.strip()
+        if not name.isascii() or not name.isidentifier():
+            continue
+        if len(value) >= 2 and value[0] == value[-1] and value[0] in ('"', "'"):
+            value = value[1:-1]
+        else:
+            value = value.partition(' #')[0].rstrip()
+        os.environ.setdefault(name, value)
+
+
+load_env()
 
 CONFIG = {
     'openai': ('OPENAI_API_KEY', 'https://api.openai.com/v1/chat/completions'),
