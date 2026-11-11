@@ -8,6 +8,8 @@
 
 Tài liệu đi kèm: [GUIDE.md](GUIDE.md) · [SUBMISSION.md](SUBMISSION.md) · [RUBRIC.md](RUBRIC.md) · [CHECKPOINTS.md](CHECKPOINTS.md) · [RULES.md](RULES.md)
 
+Tài liệu thực hành của repo: [CP2.md](CP2.md) · [CP3.md](CP3.md) · [CP4.md](CP4.md) · [CP5.md](CP5.md) · [CP7 — Demo và nộp bài](CP7.md) · [Các lệnh hoàn toàn offline](OFFLINE.md). Dùng `python review_results.py eval_before.json` để đọc kết quả đã lưu mà không gọi API.
+
 Bạn sẽ tự viết một agent loop bằng Python. Agent dùng dữ liệu thật từ GitHub Status và Cloudflare Status để hỗ trợ điều tra sự cố, sau đó bạn dùng trace và eval để kiểm tra cách agent hoạt động.
 
 **Mục tiêu:** gọi LLM → thực thi tool → đưa kết quả trở lại LLM → lặp đến khi trả lời hoặc hết giới hạn. Thời lượng dự kiến: **4 giờ**, gồm nghỉ 10 phút. Lịch theo từng ca ở [CHECKPOINTS.md](CHECKPOINTS.md). Toàn bộ các bước trong [GUIDE.md](GUIDE.md) là nội dung của lab. Đọc thêm [RUBRIC.md](RUBRIC.md) để biết tiêu chí đánh giá.
@@ -97,6 +99,30 @@ python3 evals/run_evals.py --output eval_after.json
 - Unit tests dùng fake provider, không cần key. **Ban đầu một số tests thất bại** vì `agent.py` chưa được implement.
 - Eval gọi LLM cho agent và LLM judge, tiêu tốn token. Mỗi case có điểm 0–100; điểm tổng là trung bình các case. Nếu có case chưa chấm được, điểm tổng là `null`. Đọc giải thích và trace; điểm judge là ước lượng, cần kiểm tra lại.
 - Có thể override bằng `--provider`, `--model`, `--max-steps`. `--max-steps` là số lần gọi model, mặc định 6 với `run.py`, 8 với `evals/run_evals.py` và 16 khi chạy eval bonus.
+
+Eval tự lưu kết quả sau mỗi case. Nếu gặp HTTP 429, runner lưu các case đã xong và dừng những case tiếp theo. Với model OpenRouter `:free`, các requests của agent và judge được giãn ít nhất 3,1 giây trong cùng process; giới hạn riêng của nhà cung cấp model vẫn có thể gây 429.
+
+Khi có lại quota hoặc model hết bị giới hạn, chạy tiếp bằng:
+
+```powershell
+python evals/run_evals.py --resume --output eval_before.json
+```
+
+`--resume` giữ nguyên cả case điểm thấp/0 đã được chấm và chỉ thử lại case chưa chấm. Nếu agent đã hoàn thành nhưng judge lỗi, chỉ gọi lại judge. Không đổi model, judge, max steps, dataset hoặc mã nguồn giữa các lần resume; runner đối chiếu cấu hình và hash mã nguồn để tránh trộn kết quả. Muốn đánh giá phiên bản mới, dùng file output mới.
+
+`--seed <file.json>` dùng lại kết quả chạy riêng cùng cấu hình và hash để bắt đầu một output mới. Điểm/trace của case được giữ nguyên, cả điểm 0; chỉ các case chưa chấm được chạy tiếp. Runner từ chối output đã tồn tại và các nguồn trùng case. Sau lần đầu, tiếp tục output bằng `--resume`, không dùng lại `--seed`. Xem [CP4.md](CP4.md) để dùng lại E2 của GPT-4o mini khi chạy đủ 22 case.
+
+Có thể dùng `--max-cases 3` để chạy tối đa ba case chưa chấm mỗi lần. Các case còn lại được ghi là chưa chạy, điểm tổng vẫn `null` đến khi đủ toàn bộ case. Checkpoint cũ chưa có hash cần được giữ làm bản lưu và chạy một lượt mới để dùng chế độ resume.
+
+Khi dùng GPT-4o mini qua OpenRouter, đặt `PROVIDER=openrouter`, `MODEL=openai/gpt-4o-mini`, `JUDGE_PROVIDER=openrouter`, `JUDGE_MODEL=openai/gpt-4o-mini` trong `.env`. `openai` là phần tên nhà phát triển trong model ID, còn kết nối API vẫn qua OpenRouter. Đây là model trả phí, cần credits trên tài khoản OpenRouter.
+
+Bản checkpoint NVIDIA 11/22 case đã được giữ riêng trong `artifacts/eval_before_nemotron_partial.json`. Với model mới, học viên tự chạy baseline mới vào file riêng:
+
+```powershell
+python evals/run_evals.py --model openai/gpt-4o-mini --judge-model openai/gpt-4o-mini --output eval_before_gpt4o_mini.json
+```
+
+Các lần tiếp tục cùng model này dùng `--resume --output eval_before_gpt4o_mini.json`. File cần nộp cuối cùng vẫn theo tên trong `SUBMISSION.md`; chỉ chốt file baseline khi đã chấm đủ bộ và giữ nguyên bản lưu của những lần chạy trước.
 
 Snapshot bài chính được lưu ngày 09/11/2026; snapshot của ba API bổ sung được lưu ngày 10/11/2026. Không dùng nó để trả lời tình trạng hiện tại trong thực tế. Khi chạy live, API có thể rate limit, timeout hoặc thay đổi dữ liệu.
 

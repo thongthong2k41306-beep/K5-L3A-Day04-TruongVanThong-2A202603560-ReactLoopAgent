@@ -2,6 +2,8 @@
 import json
 import os
 from pathlib import Path
+import threading
+import time
 import urllib.error
 import urllib.request
 
@@ -39,6 +41,32 @@ CONFIG = {
     'anthropic': ('ANTHROPIC_API_KEY', 'https://api.anthropic.com/v1/messages'),
 }
 
+_FREE_REQUEST_LOCK = threading.Lock()
+_next_free_request_at = 0.0
+
+
+def _wait_for_free_request():
+    """Giãn các requests miễn phí của cả agent và judge trong cùng process."""
+    global _next_free_request_at
+    with _FREE_REQUEST_LOCK:
+        delay = _next_free_request_at - time.monotonic()
+        if delay > 0:
+            time.sleep(delay)
+        _next_free_request_at = time.monotonic() + 3.1
+
+
+class ProviderHTTPError(RuntimeError):
+    def __init__(self, status_code, retry_after=None, limit_source=None):
+        self.status_code = status_code
+        self.retry_after = retry_after
+        self.limit_source = limit_source
+        message = f'Provider trả HTTP {status_code}; kiểm tra model, key và quota.'
+        if status_code == 429:
+            message = 'Provider trả HTTP 429: đang bị giới hạn requests; chờ rồi chạy tiếp.'
+            if limit_source == 'upstream_provider_shared_pool':
+                message += ' Tài nguyên dùng chung của nhà cung cấp model đang bị giới hạn.'
+        super().__init__(message)
+
 
 def post_json(url, headers, payload):
     req = urllib.request.Request(url, data=json.dumps(payload).encode(), headers={'Content-Type': 'application/json', **headers})
@@ -47,7 +75,18 @@ def post_json(url, headers, payload):
             return json.load(response)
     except urllib.error.HTTPError as exc:
         # Do not print response bodies: they may contain account or request data.
-        raise RuntimeError(f'Provider trả HTTP {exc.code}; kiểm tra model, key và quota.') from exc
+        limit_source = None
+        if exc.code == 429:
+            try:
+                error = json.load(exc).get('error', {})
+                if isinstance(error, dict):
+                    metadata = error.get('metadata', {})
+                    if isinstance(metadata, dict):
+                        limit_source = metadata.get('limit_source')
+            except (ValueError, TypeError, AttributeError, OSError):
+                pass
+        raise ProviderHTTPError(exc.code, exc.headers.get('Retry-After') if exc.headers else None,
+                                limit_source) from exc
     except urllib.error.URLError as exc:
         raise RuntimeError(f'Không kết nối được provider: {exc.reason}') from exc
 
@@ -70,6 +109,8 @@ class Provider:
             raise ValueError(f'Thiếu {key_name}; xem README.md.')
 
     def complete(self, messages, schemas):
+        if self.name == 'openrouter' and self.model.endswith(':free'):
+            _wait_for_free_request()
         if self.name == 'anthropic':
             return self._anthropic(messages, schemas)
         payload = {'model': self.model, 'messages': messages}

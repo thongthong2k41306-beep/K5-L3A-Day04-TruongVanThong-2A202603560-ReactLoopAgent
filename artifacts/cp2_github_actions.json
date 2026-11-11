@@ -1,0 +1,178 @@
+{
+  "question": "GitHub Actions hi?n c? s? c? kh?ng? H?y ki?m tra incident g?n ??y.",
+  "provider": "openrouter",
+  "model": "baidu/ernie-5.5-flash-preview:free",
+  "mode": "snapshot",
+  "max_steps": 6,
+  "status": "completed",
+  "answer": "Dựa trên dữ liệu từ GitHub Status (snapshot lúc 2026-11-09T03:50:47Z):\n\n**Hiện tại GitHub Actions đang hoạt động bình thường.** Trạng thái tổng thể là \"All Systems Operational\" — không có sự cố đang diễn ra.\n\n**Các incident Actions gần đây (đã được giải quyết):**\n\n1. **Incident with Actions** (ID: `t89g2q1800fr`) — resolved, cập nhật lần cuối 2026-11-05T17:42:35Z\n2. **Incident with Actions and Pages** (ID: `xr3myzj7ms51`) — resolved, cập nhật 2026-11-07T01:04:38Z\n3. **Incident with Actions** (ID: `h02n9572mx9y`) — resolved, cập nhật 2026-11-07T01:10:18Z\n4. **Delayed Actions status check results** (ID: `ntrfd2jqldn6`) — resolved, cập nhật 2026-10-28T22:29:49Z\n5. **Degraded availability for GitHub Actions, GitHub Pages and Webhooks** (ID: `8tzbpcnl75jp`) — resolved, cập nhật 2026-10-22T13:12:51Z\n\nNếu bạn đang gặp sự cố với Actions, các incident trên đều đã được đánh dấu \"resolved\". Bạn có muốn tôi kiểm tra chi tiết một incident cụ thể nào không?",
+  "trace": [
+    {
+      "event": "model",
+      "step": 1,
+      "finish": "tool_calls",
+      "tool_calls": 2
+    },
+    {
+      "event": "tool",
+      "step": 1,
+      "name": "get_status",
+      "tool_call_id": "call_1d55167a2c3a4fe882957d44",
+      "arguments": {
+        "provider": "github"
+      },
+      "result": {
+        "provider": "github",
+        "captured_at": "2026-11-09T03:50:47.065020+00:00",
+        "overall": {
+          "indicator": "none",
+          "description": "All Systems Operational"
+        },
+        "components": [],
+        "incidents": [
+          {
+            "id": "pyynvrm1vskw",
+            "name": "Increase in timeouts for some unauthenticated users",
+            "status": "resolved",
+            "updated_at": "2026-11-08T12:32:35.646Z"
+          },
+          {
+            "id": "pfbmpxxfq1cy",
+            "name": "Degraded performance for multiple GitHub services",
+            "status": "resolved",
+            "updated_at": "2026-11-06T00:20:49.369Z"
+          },
+          {
+            "id": "t89g2q1800fr",
+            "name": "Incident with Actions",
+            "status": "resolved",
+            "updated_at": "2026-11-05T17:42:35.455Z"
+          },
+          {
+            "id": "h02n9572mx9y",
+            "name": "Incident with Actions",
+            "status": "resolved",
+            "updated_at": "2026-11-07T01:10:18.506Z"
+          },
+          {
+            "id": "xr3myzj7ms51",
+            "name": "Incident with Actions and Pages",
+            "status": "resolved",
+            "updated_at": "2026-11-07T01:04:38.647Z"
+          }
+        ],
+        "matching_incidents_in_last_50": 50,
+        "note": "Chỉ tìm theo chuỗi trong 50 incident gần nhất; không tìm thấy không chứng minh không có sự cố.",
+        "source": "https://www.githubstatus.com"
+      }
+    },
+    {
+      "event": "tool",
+      "step": 1,
+      "name": "get_status",
+      "tool_call_id": "call_cccb67e72340407e86005b25",
+      "arguments": {
+        "component": "GitHub Actions",
+        "provider": "github"
+      },
+      "result": {
+        "provider": "github",
+        "captured_at": "2026-11-09T03:50:47.065020+00:00",
+        "overall": {
+          "indicator": "none",
+          "description": "All Systems Operational"
+        },
+        "components": [],
+        "incidents": [
+          {
+            "id": "t89g2q1800fr",
+            "name": "Incident with Actions",
+            "status": "resolved",
+            "updated_at": "2026-11-05T17:42:35.455Z"
+          },
+          {
+            "id": "xr3myzj7ms51",
+            "name": "Incident with Actions and Pages",
+            "status": "resolved",
+            "updated_at": "2026-11-07T01:04:38.647Z"
+          },
+          {
+            "id": "ntrfd2jqldn6",
+            "name": "Delayed Actions status check results",
+            "status": "resolved",
+            "updated_at": "2026-10-28T22:29:49.032Z"
+          },
+          {
+            "id": "q29p76qtnkyk",
+            "name": "Incident with Actions",
+            "status": "resolved",
+            "updated_at": "2026-11-05T00:04:42.627Z"
+          },
+          {
+            "id": "8tzbpcnl75jp",
+            "name": "Degraded availability for GitHub Actions, GitHub Pages and Webhooks",
+            "status": "resolved",
+            "updated_at": "2026-10-22T13:12:51.444Z"
+          }
+        ],
+        "matching_incidents_in_last_50": 11,
+        "note": "Chỉ tìm theo chuỗi trong 50 incident gần nhất; không tìm thấy không chứng minh không có sự cố.",
+        "source": "https://www.githubstatus.com"
+      }
+    },
+    {
+      "event": "model",
+      "step": 2,
+      "finish": "stop",
+      "tool_calls": 0
+    }
+  ],
+  "usage": [
+    {
+      "prompt_tokens": 459,
+      "completion_tokens": 212,
+      "total_tokens": 671,
+      "cost": 0,
+      "is_byok": false,
+      "prompt_tokens_details": {
+        "cached_tokens": 256,
+        "cache_write_tokens": 0,
+        "audio_tokens": 0,
+        "video_tokens": 0
+      },
+      "cost_details": {
+        "upstream_inference_cost": 0,
+        "upstream_inference_prompt_cost": 0,
+        "upstream_inference_completions_cost": 0
+      },
+      "completion_tokens_details": {
+        "reasoning_tokens": 162,
+        "image_tokens": 0,
+        "audio_tokens": 0
+      }
+    },
+    {
+      "prompt_tokens": 1405,
+      "completion_tokens": 322,
+      "total_tokens": 1727,
+      "cost": 0,
+      "is_byok": false,
+      "prompt_tokens_details": {
+        "cached_tokens": 256,
+        "cache_write_tokens": 0,
+        "audio_tokens": 0,
+        "video_tokens": 0
+      },
+      "cost_details": {
+        "upstream_inference_cost": 0,
+        "upstream_inference_prompt_cost": 0,
+        "upstream_inference_completions_cost": 0
+      },
+      "completion_tokens_details": {
+        "reasoning_tokens": 0,
+        "image_tokens": 0,
+        "audio_tokens": 0
+      }
+    }
+  ]
+}
